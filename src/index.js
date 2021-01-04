@@ -1,6 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const bodyParser = require("body-parser");
+const routes = require("./routes");
+const usersModel = require("./models/users.model");
+const passport = require("passport");
 
 const app = express();
 
@@ -26,7 +30,8 @@ mongoose.connect(
 
 app.set("view engine", "ejs");
 
-app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 app.use(
 	session({
 		resave: false,
@@ -34,3 +39,12 @@ app.use(
 		secret: "nofurryshithere",
 	})
 );
+
+app.use("/users", routes.users);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(usersModel.createStrategy());
+passport.serializeUser(usersModel.serializeUser());
+passport.deserializeUser(usersModel.deserializeUser());
